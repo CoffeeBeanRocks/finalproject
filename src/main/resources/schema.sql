@@ -1,4 +1,2 @@
-CREATE TABLE IF NOT EXISTS LoginModel
-CREATE TABLE IF NOT EXISTS AccountModel
-CREATE TABLE IF NOT EXISTS Subject
+create schema if not exists bank
 
