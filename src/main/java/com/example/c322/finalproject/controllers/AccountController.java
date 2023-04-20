@@ -34,6 +34,36 @@ public class AccountController {
 
     @PostMapping("/transfer/{recipientEmail}/{myEmail}/{myPassword}/{amount}")
     public void transfer(@PathVariable String recipientEmail, @PathVariable String myEmail, @PathVariable String myPassword, @PathVariable double amount) {
+        // Validate the recipient email
+
+        // Validate user login information and retrieve user bank account information
+        List<Login> maybeLogin = loginRepository.findByEmail(myEmail);
+        if (maybeLogin == null) {
+            throw new IllegalArgumentException("Invalid login information!");
+        }
+
+
+        userBankAccount.setBalance(userBalance - amount);
+        accountRepository.save(userBankAccount);
+
+        // Add amount to recipient's bank account balance and update in the database
+        User recipient = accountRepository.findByEmail(recipientEmail);
+        if (recipient == null) {
+            throw new IllegalArgumentException("Recipient email not found");
+        }
+
+        BankAccount recipientBankAccount = recipient.getBankAccount();
+        if (recipientBankAccount == null) {
+            throw new IllegalArgumentException("Recipient has no bank account");
+        }
+
+        double recipientBalance = recipientBankAccount.getBalance();
+        recipientBankAccount.setBalance(recipientBalance + amount);
+        accountRepository.save(recipientBankAccount);
+    }
+
+
+
         //TODO: Validate user login information
         //TODO: Validate recipientEmail
         //TODO: Update users bank accounts
