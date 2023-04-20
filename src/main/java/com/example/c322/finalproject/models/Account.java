@@ -4,7 +4,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 
 @Entity
-public class Account {
+public class Account implements AccountService{
     @Id
     private int id;
 
@@ -26,9 +26,20 @@ public class Account {
         this.balance = balance;
     }
 
-    // needs to edit balance from this.account and find new account in database to add funds
+    public void addAmount(double amount) {
+        balance += amount;
+    }
+
+    public void subtractAmount(double amount) {
+        balance -= amount;
+    }
+
+    @Override
     public void transferMoney(Account account, double amount) {
-        this.balance -= amount;
-        account.setBalance(account.getBalance()+amount);
+        if(balance - amount < 0)
+            throw new IllegalStateException("Insufficient Funds!");
+
+        subtractAmount(amount);
+        account.addAmount(amount);
     }
 }

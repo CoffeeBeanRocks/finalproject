@@ -8,7 +8,6 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping
 public class GreetingController {
 
-    //Get https//:localhost:8080/test
     @GetMapping("/test")
     public String greetings() {
         return "Banking System!";

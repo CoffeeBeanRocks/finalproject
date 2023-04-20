@@ -37,4 +37,8 @@ public class Login {
     public void setAccount(Account account) {
         this.account = account;
     }
+
+    public boolean validCredentials(String email, String password) {
+        return email.equals(this.email) && password.equals(this.password);
+    }
 }
