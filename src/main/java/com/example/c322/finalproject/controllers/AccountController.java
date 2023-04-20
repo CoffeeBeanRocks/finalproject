@@ -3,10 +3,7 @@ package com.example.c322.finalproject.controllers;
 import com.example.c322.finalproject.models.Login;
 import com.example.c322.finalproject.repositories.AccountRepository;
 import com.example.c322.finalproject.repositories.LoginRepository;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -33,5 +30,12 @@ public class AccountController {
         }
         else
             throw new IllegalStateException("Account not found!");
+    }
+
+    @PostMapping("/transfer/{recipientEmail}/{myEmail}/{myPassword}/{amount}")
+    public void transfer(@PathVariable String recipientEmail, @PathVariable String myEmail, @PathVariable String myPassword, @PathVariable double amount) {
+        //TODO: Validate user login information
+        //TODO: Validate recipientEmail
+        //TODO: Update users bank accounts
     }
 }
