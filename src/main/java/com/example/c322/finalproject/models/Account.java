@@ -10,6 +10,8 @@ public class Account implements AccountService{
 
     private double balance;
 
+    private boolean sendEmail;
+
     public int getId() {
         return id;
     }
@@ -32,6 +34,14 @@ public class Account implements AccountService{
 
     public void subtractAmount(double amount) {
         balance -= amount;
+    }
+
+    public boolean isSendEmail() {
+        return sendEmail;
+    }
+
+    public void setSendEmail(boolean sendEmail) {
+        this.sendEmail = sendEmail;
     }
 
     @Override
