@@ -35,11 +35,8 @@ public class Account implements AccountService{
     }
 
     @Override
-    public void transferMoney(Account account, double amount) {
-        if(balance - amount < 0)
-            throw new IllegalStateException("Insufficient Funds!");
-
+    public void transferMoney(Account recipient, double amount) {
         subtractAmount(amount);
-        account.addAmount(amount);
+        recipient.addAmount(amount);
     }
 }

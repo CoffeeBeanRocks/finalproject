@@ -1,8 +1,11 @@
 package com.example.c322.finalproject.controllers;
 
+import com.example.c322.finalproject.models.Account;
 import com.example.c322.finalproject.models.Login;
+import com.example.c322.finalproject.models.ProxyAccount;
 import com.example.c322.finalproject.repositories.AccountRepository;
 import com.example.c322.finalproject.repositories.LoginRepository;
+import com.example.c322.finalproject.repositories.TransactionRepository;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -13,10 +16,12 @@ public class AccountController {
 
     private LoginRepository loginRepository;
     private AccountRepository accountRepository;
+    private TransactionRepository transactionRepository;
 
-    public AccountController(LoginRepository loginRepository, AccountRepository accountRepository) {
+    public AccountController(LoginRepository loginRepository, AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.loginRepository = loginRepository;
         this.accountRepository = accountRepository;
+        this.transactionRepository = transactionRepository;
     }
 
     @GetMapping("/valid/{email}/{password}")
@@ -34,38 +39,20 @@ public class AccountController {
 
     @PostMapping("/transfer/{recipientEmail}/{myEmail}/{myPassword}/{amount}")
     public void transfer(@PathVariable String recipientEmail, @PathVariable String myEmail, @PathVariable String myPassword, @PathVariable double amount) {
-        // Validate the recipient email
+        if(validLogin(myEmail, myPassword))
+        {
+            List<Login> maybeLogin = loginRepository.findByEmail(recipientEmail);
+            if(maybeLogin.isEmpty())
+                throw new IllegalStateException("Recipient Account Not Found!");
 
-        // Validate user login information and retrieve user bank account information
-        List<Login> maybeLogin = loginRepository.findByEmail(myEmail);
-        if (maybeLogin == null) {
-            throw new IllegalArgumentException("Invalid login information!");
+            Account recipientAccount = maybeLogin.get(0).getAccount();
+            Account senderAccount = loginRepository.findByEmail(myEmail).get(0).getAccount();
+
+            ProxyAccount myProxy = new ProxyAccount(senderAccount, transactionRepository);
+
+            myProxy.transferMoney(recipientAccount, amount);
         }
-
-
-        userBankAccount.setBalance(userBalance - amount);
-        accountRepository.save(userBankAccount);
-
-        // Add amount to recipient's bank account balance and update in the database
-        User recipient = accountRepository.findByEmail(recipientEmail);
-        if (recipient == null) {
-            throw new IllegalArgumentException("Recipient email not found");
-        }
-
-        BankAccount recipientBankAccount = recipient.getBankAccount();
-        if (recipientBankAccount == null) {
-            throw new IllegalArgumentException("Recipient has no bank account");
-        }
-
-        double recipientBalance = recipientBankAccount.getBalance();
-        recipientBankAccount.setBalance(recipientBalance + amount);
-        accountRepository.save(recipientBankAccount);
+        throw new IllegalStateException("Invalid Login Credentials!");
     }
 
-
-
-        //TODO: Validate user login information
-        //TODO: Validate recipientEmail
-        //TODO: Update users bank accounts
-    }
 }
