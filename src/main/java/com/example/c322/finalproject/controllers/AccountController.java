@@ -1,15 +1,13 @@
 package com.example.c322.finalproject.controllers;
 
-import com.example.c322.finalproject.models.Account;
-import com.example.c322.finalproject.models.Login;
-import com.example.c322.finalproject.models.ProxyAccount;
+import com.example.c322.finalproject.models.*;
+import com.example.c322.finalproject.models.Observer;
 import com.example.c322.finalproject.repositories.AccountRepository;
 import com.example.c322.finalproject.repositories.LoginRepository;
 import com.example.c322.finalproject.repositories.TransactionRepository;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @RestController
 @RequestMapping("/accounts")
@@ -19,10 +17,13 @@ public class AccountController {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
 
+    private Subject subject;
+
     public AccountController(LoginRepository loginRepository, AccountRepository accountRepository, TransactionRepository transactionRepository) {
         this.loginRepository = loginRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
+        this.subject = new Subject();
     }
 
     @GetMapping("/valid/{email}/{password}")
@@ -52,6 +53,9 @@ public class AccountController {
         ProxyAccount myProxy = new ProxyAccount(senderAccount, transactionRepository);
 
         myProxy.transferMoney(recipientAccount, amount);
+
+        subject.notify(recipientEmail);
+        subject.notify(myEmail);
     }
 
     @GetMapping("/find/{accountId}")
@@ -73,6 +77,10 @@ public class AccountController {
             account.setBalance(100);
             accountRepository.save(account);
 
+            if(sendEmail) {
+                subject.subscribe(email, new TransferObserver());
+            }
+
             Login login = new Login();
             login.setEmail(email);
             login.setPassword(password);
@@ -82,7 +90,18 @@ public class AccountController {
         throw new IllegalStateException("That Email Is Already Associated With An Account!");
     }
 
-    //TODO: Send email
+    @PutMapping("/update/emails")
+    public void updateObservers() {
+        List<Account> sendEmailAccounts = accountRepository.findBySendEmail(true);
+        Map<String, Observer> observerList = new HashMap<>();
+        for(Account acc : sendEmailAccounts) {
+            if(acc.isSendEmail()) {
+                String email = loginRepository.findByAccount(acc).get(0).getEmail();
+                observerList.put(email, new TransferObserver());
+            }
+        }
+        subject.setObservers(observerList);
+    }
 
     //TODO: Post account notification preferences
 }
