@@ -53,7 +53,7 @@ public class AccountController {
             throw new IllegalStateException("Recipient Account Not Found!");
 
         Account recipientAccount = maybeLogin.get().getAccount();
-        Account senderAccount = getAccount(senderId);
+        Account senderAccount = getAccountFromId(senderId);
 
         ProxyAccount myProxy = new ProxyAccount(senderAccount, transactionRepository);
 
@@ -63,11 +63,21 @@ public class AccountController {
         subject.notify(myEmail);
     }
 
-    @GetMapping("/find/{accountId}")
-    public Account getAccount(@PathVariable int accountId) {
+    @GetMapping("/find/id/{accountId}")
+    public Account getAccountFromId(@PathVariable int accountId) {
         Optional<Account> maybeAccount = accountRepository.findById(accountId);
         if(maybeAccount.isPresent()) {
             return maybeAccount.get();
+        }
+        else
+            throw new IllegalStateException("Account not found!");
+    }
+
+    @GetMapping("/find/email/{email}")
+    public Account getAccountFromEmail(@PathVariable String email) {
+        Optional<Login> maybeLogin = loginRepository.findByEmail(email);
+        if(maybeLogin.isPresent()) {
+            return maybeLogin.get().getAccount();
         }
         else
             throw new IllegalStateException("Account not found!");
