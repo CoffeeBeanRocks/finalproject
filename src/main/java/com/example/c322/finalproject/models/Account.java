@@ -1,11 +1,14 @@
 package com.example.c322.finalproject.models;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 
 @Entity
 public class Account implements AccountService{
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
     private double balance;

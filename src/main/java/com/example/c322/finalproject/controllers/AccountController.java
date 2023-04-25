@@ -61,6 +61,9 @@ public class AccountController {
 
         subject.notify(recipientEmail);
         subject.notify(myEmail);
+
+        accountRepository.save(recipientAccount);
+        accountRepository.save(senderAccount);
     }
 
     @GetMapping("/find/id/{accountId}")
