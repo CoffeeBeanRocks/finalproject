@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/accounts")
+@RequestMapping()
 public class AccountController {
 
     private LoginRepository loginRepository;
@@ -24,6 +24,11 @@ public class AccountController {
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.subject = new Subject();
+    }
+
+    @GetMapping("/accounts")
+    public List<Account> getAllAccounts(){
+        return accountRepository.findAll();
     }
 
     @GetMapping("/valid/{email}/{password}")
@@ -69,7 +74,8 @@ public class AccountController {
     }
 
     @PostMapping("/create/{email}/{password}/{sendEmail}")
-    public int createAccount(@PathVariable String email, @PathVariable String password, @PathVariable boolean sendEmail) {
+    public int createLogin(@PathVariable String email, @PathVariable String password, @PathVariable boolean sendEmail) {
+
         if(loginRepository.findByEmail(email).isEmpty())
         {
             Account account = new Account();
@@ -86,6 +92,8 @@ public class AccountController {
             login.setPassword(password);
             login.setAccount(account);
             loginRepository.save(login);
+
+            return account.getId();
         }
         throw new IllegalStateException("That Email Is Already Associated With An Account!");
     }
