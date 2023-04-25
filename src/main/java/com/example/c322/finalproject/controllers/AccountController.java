@@ -28,9 +28,9 @@ public class AccountController {
 
     @GetMapping("/valid/{email}/{password}")
     public int validLogin(@PathVariable String email, @PathVariable String password){
-        List<Login> maybeLogin = loginRepository.findByEmail(email);
-        if(!maybeLogin.isEmpty()) {
-            Login login = maybeLogin.get(0);
+        Optional<Login> maybeLogin = loginRepository.findByEmail(email);
+        if(maybeLogin.isPresent()) {
+            Login login = maybeLogin.get();
             if(login.validCredentials(email, password))
                 return login.getAccount().getId();
             throw new IllegalStateException("Username or password is incorrect!");
@@ -43,11 +43,11 @@ public class AccountController {
     public void transfer(@PathVariable String recipientEmail, @PathVariable String myEmail, @PathVariable String myPassword, @PathVariable double amount) {
         int senderId = validLogin(myEmail, myPassword);
 
-        List<Login> maybeLogin = loginRepository.findByEmail(recipientEmail);
+        Optional<Login> maybeLogin = loginRepository.findByEmail(recipientEmail);
         if(maybeLogin.isEmpty())
             throw new IllegalStateException("Recipient Account Not Found!");
 
-        Account recipientAccount = maybeLogin.get(0).getAccount();
+        Account recipientAccount = maybeLogin.get().getAccount();
         Account senderAccount = getAccount(senderId);
 
         ProxyAccount myProxy = new ProxyAccount(senderAccount, transactionRepository);
@@ -96,12 +96,21 @@ public class AccountController {
         Map<String, Observer> observerList = new HashMap<>();
         for(Account acc : sendEmailAccounts) {
             if(acc.isSendEmail()) {
-                String email = loginRepository.findByAccount(acc).get(0).getEmail();
-                observerList.put(email, new TransferObserver());
+                Optional<Login> maybeLogin = loginRepository.findByAccount(acc);
+                if(maybeLogin.isPresent())
+                    observerList.put(maybeLogin.get().getEmail(), new TransferObserver());
             }
         }
         subject.setObservers(observerList);
     }
 
-    //TODO: Post account notification preferences
+    @PutMapping("/update/notification/{email}/{emailPreference}")
+    public void updateNotificationPreference(@PathVariable String email, @PathVariable boolean emailPreference) {
+        Optional<Login> maybeLogin = loginRepository.findByEmail(email);
+        if(maybeLogin.isEmpty())
+            throw new IllegalStateException("Email not found!");
+        Account updatedAccount = maybeLogin.get().getAccount();
+        updatedAccount.setSendEmail(emailPreference);
+        accountRepository.save(updatedAccount);
+    }
 }
