@@ -1,30 +1,23 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
 import { useState, useEffect } from 'react';
 
-const inter = Inter({ subsets: ['latin'] })
-
-
 function BankAccountPage() {
-    const [accounts, setAccounts] = useState([]);
+    const [bankAccounts, setBankAccounts] = useState([]);
     const [selectedAccount, setSelectedAccount] = useState(null);
-    const [balance, setBalance] = useState(null);
+    const [accountBalance, setAccountBalance] = useState(null);
     const [transferAmount, setTransferAmount] = useState(null);
 
     useEffect(() => {
-        // Fetch list of accounts from API
-        fetch('/api/accounts')
+        fetch("/accounts")
             .then(response => response.json())
-            .then(data => setAccounts(data))
+            .then(data => setBankAccounts(data))
             .catch(error => console.error(error));
     }, []);
 
     useEffect(() => {
         if (selectedAccount) {
-            // Fetch account balance for selected account from API
-            fetch(`/api/accounts/${selectedAccount.id}/balance`)
+            fetch("/create/{email}/{password}/{sendEmail}")
                 .then(response => response.json())
-                .then(data => setBalance(data.balance))
+                .then(data => setAccountBalance(data.balance))
                 .catch(error => console.error(error));
         }
     }, [selectedAccount]);
@@ -41,8 +34,7 @@ function BankAccountPage() {
         event.preventDefault();
 
         if (selectedAccount && transferAmount) {
-            // Send transfer request to API
-            fetch(`/api/accounts/${selectedAccount.id}/transfer`, {
+            fetch("/transfer/{recipientEmail}/{myEmail}/{myPassword}/{amount}", {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: transferAmount })
@@ -50,7 +42,6 @@ function BankAccountPage() {
                 .then(response => response.json())
                 .then(data => {
                     console.log('Transfer successful');
-                    // Refresh account and balance data
                     setSelectedAccount(selectedAccount);
                 })
                 .catch(error => console.error(error));
@@ -61,7 +52,7 @@ function BankAccountPage() {
         <div>
             <h1>Bank Accounts</h1>
             <ul>
-                {accounts.map(account => (
+                {bankAccounts.map(account => (
                     <li key={account.id} onClick={() => handleAccountSelect(account)}>
                         {account.name}
                     </li>
@@ -70,7 +61,7 @@ function BankAccountPage() {
             {selectedAccount && (
                 <div>
                     <h2>{selectedAccount.name}</h2>
-                    <p>Balance: {balance}</p>
+                    <p>Balance: {accountBalance}</p>
                     <form onSubmit={handleTransferSubmit}>
                         <label>
                             Transfer Amount:
