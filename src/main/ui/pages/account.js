@@ -7,9 +7,14 @@ function BankAccountPage() {
     const [transferAmount, setTransferAmount] = useState(null);
 
     useEffect(() => {
-        fetch("/accounts")
+        fetch("http://localhost:8080/accounts")
             .then(response => response.json())
-            .then(data => setBankAccounts(data))
+            .then(data =>
+                {
+                    console.log(data);
+                    setBankAccounts(data);
+                }
+            )
             .catch(error => console.error(error));
     }, []);
 
@@ -54,7 +59,7 @@ function BankAccountPage() {
             <ul>
                 {bankAccounts.map(account => (
                     <li key={account.id} onClick={() => handleAccountSelect(account)}>
-                        {account.name}
+                        {account.id}
                     </li>
                 ))}
             </ul>
