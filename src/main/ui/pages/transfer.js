@@ -17,7 +17,7 @@ function TransferPage() {
         event.preventDefault();
 
         if (recipientEmail && transferAmount) {
-            fetch('/api/transfers', {
+            fetch('http://localhost:8080/api/transfers', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ recipientEmail, transferAmount })
