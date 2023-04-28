@@ -21,9 +21,10 @@ public class Subject {
         observers.remove(email);
     }
 
-    public void notify(String email) {
-        if(observers.containsKey(email))
-            observers.get(email).notify();
+    public void notify(Notification notification) {
+        for (Map.Entry<String, Observer> entry : observers.entrySet()) {
+            entry.getValue().update(notification);
+        }
     }
 
     public Map<String, Observer> getObservers() {

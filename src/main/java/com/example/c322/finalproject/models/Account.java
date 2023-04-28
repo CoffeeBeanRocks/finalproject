@@ -1,12 +1,11 @@
 package com.example.c322.finalproject.models;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
+
+import java.util.List;
 
 @Entity
-public class Account implements AccountService{
+public class Account implements AccountService, Observer{
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
@@ -14,6 +13,9 @@ public class Account implements AccountService{
     private double balance;
 
     private boolean sendEmail;
+
+    @OneToMany
+    private List<Notification> notificationList;
 
     public int getId() {
         return id;
@@ -51,5 +53,10 @@ public class Account implements AccountService{
     public void transferMoney(Account recipient, double amount) {
         subtractAmount(amount);
         recipient.addAmount(amount);
+    }
+
+    @Override
+    public void update(Notification notification) {
+        notificationList.add(notification);
     }
 }

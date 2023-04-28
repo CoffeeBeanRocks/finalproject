@@ -4,6 +4,7 @@ import com.example.c322.finalproject.models.*;
 import com.example.c322.finalproject.models.Observer;
 import com.example.c322.finalproject.repositories.AccountRepository;
 import com.example.c322.finalproject.repositories.LoginRepository;
+import com.example.c322.finalproject.repositories.NotificationRepository;
 import com.example.c322.finalproject.repositories.TransactionRepository;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,14 +18,24 @@ public class AccountController {
     private LoginRepository loginRepository;
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
+    private NotificationRepository notificationRepository;
 
     private Subject subject;
 
-    public AccountController(LoginRepository loginRepository, AccountRepository accountRepository, TransactionRepository transactionRepository) {
+    public AccountController(LoginRepository loginRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
         this.loginRepository = loginRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
+        this.notificationRepository = notificationRepository;
         this.subject = new Subject();
+    }
+
+    @PutMapping("/notification/{message}")
+    public void addNotification(@PathVariable String message) {
+        Notification notification = new Notification();
+        notification.setMessage(message);
+        notificationRepository.save(notification);
+        subject.notify(notification);
     }
 
     @GetMapping("/accounts")
@@ -59,9 +70,6 @@ public class AccountController {
         ProxyAccount myProxy = new ProxyAccount(senderAccount, transactionRepository);
 
         myProxy.transferMoney(recipientAccount, amount);
-
-        subject.notify(recipientEmail);
-        subject.notify(myEmail);
 
         accountRepository.save(recipientAccount);
         accountRepository.save(senderAccount);
@@ -98,7 +106,7 @@ public class AccountController {
             accountRepository.save(account);
 
             if(sendEmail) {
-                subject.subscribe(email, new TransferObserver());
+                subject.subscribe(email, account);
             }
 
             Login login = new Login();
@@ -119,8 +127,7 @@ public class AccountController {
         for(Account acc : sendEmailAccounts) {
             if(acc.isSendEmail()) {
                 Optional<Login> maybeLogin = loginRepository.findByAccount(acc);
-                if(maybeLogin.isPresent())
-                    observerList.put(maybeLogin.get().getEmail(), new TransferObserver());
+                maybeLogin.ifPresent(login -> observerList.put(login.getEmail(), acc));
             }
         }
         subject.setObservers(observerList);
