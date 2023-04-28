@@ -6,6 +6,7 @@ import com.example.c322.finalproject.repositories.AccountRepository;
 import com.example.c322.finalproject.repositories.LoginRepository;
 import com.example.c322.finalproject.repositories.NotificationRepository;
 import com.example.c322.finalproject.repositories.TransactionRepository;
+import jakarta.persistence.criteria.CriteriaBuilder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -19,7 +20,6 @@ public class AccountController {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
     private NotificationRepository notificationRepository;
-
     private Subject subject;
 
     public AccountController(LoginRepository loginRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
@@ -28,14 +28,6 @@ public class AccountController {
         this.transactionRepository = transactionRepository;
         this.notificationRepository = notificationRepository;
         this.subject = new Subject();
-    }
-
-    @PutMapping("/notification/{message}")
-    public void addNotification(@PathVariable String message) {
-        Notification notification = new Notification();
-        notification.setMessage(message);
-        notificationRepository.save(notification);
-        subject.notify(notification);
     }
 
     @GetMapping("/accounts")
@@ -106,7 +98,7 @@ public class AccountController {
             accountRepository.save(account);
 
             if(sendEmail) {
-                subject.subscribe(email, account);
+                subject.subscribe(account);
             }
 
             Login login = new Login();
@@ -123,11 +115,10 @@ public class AccountController {
     @PutMapping("/update/emails")
     public void updateObservers() {
         List<Account> sendEmailAccounts = accountRepository.findBySendEmail(true);
-        Map<String, Observer> observerList = new HashMap<>();
+        List<Observer> observerList = new ArrayList<>();
         for(Account acc : sendEmailAccounts) {
             if(acc.isSendEmail()) {
-                Optional<Login> maybeLogin = loginRepository.findByAccount(acc);
-                maybeLogin.ifPresent(login -> observerList.put(login.getEmail(), acc));
+                observerList.add(acc);
             }
         }
         subject.setObservers(observerList);
@@ -139,7 +130,42 @@ public class AccountController {
         if(maybeLogin.isEmpty())
             throw new IllegalStateException("Email not found!");
         Account updatedAccount = maybeLogin.get().getAccount();
+
+        if(emailPreference) {
+            if(!subject.getObservers().contains(updatedAccount))
+                subject.subscribe(updatedAccount);
+        }
+        else
+            subject.unsubscribe(updatedAccount);
+
         updatedAccount.setSendEmail(emailPreference);
         accountRepository.save(updatedAccount);
+    }
+
+    @GetMapping("/allNotifications")
+    public List<Notification> getAllNotificiations() {
+        return notificationRepository.findAll();
+    }
+
+    @GetMapping("/notifylist")
+    public List<Observer> getAccountsToNotify() {
+        return subject.getObservers();
+    }
+
+    @PostMapping("/notification")
+    public void addNotification(@RequestBody Notification notification) {
+        notificationRepository.save(notification);
+
+        subject.notify(notification);
+        for(Observer obs : subject.getObservers()) {
+            accountRepository.save((Account) obs);
+        }
+
+//        Optional<Account> account = accountRepository.findById(accountid);
+//        if(account.isPresent()) {
+//            Account newAcc = account.get();
+//            newAcc.update(notification);
+//            accountRepository.save(newAcc);
+//        }
     }
 }

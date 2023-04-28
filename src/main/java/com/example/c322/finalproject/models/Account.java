@@ -2,6 +2,7 @@ package com.example.c322.finalproject.models;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,7 +15,7 @@ public class Account implements AccountService, Observer{
 
     private boolean sendEmail;
 
-    @OneToMany
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Notification> notificationList;
 
     public int getId() {
