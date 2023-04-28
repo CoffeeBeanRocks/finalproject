@@ -4,34 +4,27 @@ const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
     return (
-      <html>
-      <head>
-          <h1>Banking System</h1>
-      </head>
+      <>
+          <div className="login-form">
+              <form>
+                  <h1>Login</h1>
 
-      <body>
-      <div className="login-form">
-          <form>
-              <h1>Login</h1>
-
-              <div className="content">
-                  <div className="input-field">
-                      <input type="email" placeholder="Email" autoComplete="nope"></input>
+                  <div className="content">
+                      <div className="input-field">
+                          <input type="email" placeholder="Email" autoComplete="nope"></input>
+                      </div>
+                      <div className="input-field">
+                          <input type="password" placeholder="Password" autoComplete="new-password"></input>
+                      </div>
                   </div>
-                  <div className="input-field">
-                      <input type="password" placeholder="Password" autoComplete="new-password"></input>
+
+                  <div className="action">
+                      <button>Register</button>
+                      <button>Sign in</button>
                   </div>
-              </div>
-
-              <div className="action">
-                  <button>Register</button>
-                  <button>Sign in</button>
-              </div>
-          </form>
-      </div>
-      <script src="./script.js"></script>
-
-      </body>
-      </html>
+              </form>
+          </div>
+          <script src="./script.js"></script>
+      </>
   )
 }
