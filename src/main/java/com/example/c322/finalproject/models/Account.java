@@ -49,6 +49,14 @@ public class Account implements AccountService, Observer{
         this.sendEmail = sendEmail;
     }
 
+    public List<Notification> getNotificationList() {
+        return notificationList;
+    }
+
+    public void setNotificationList(List<Notification> notificationList) {
+        this.notificationList = notificationList;
+    }
+
     @Override
     public void transferMoney(Account recipient, double amount) {
         subtractAmount(amount);
