@@ -20,14 +20,12 @@ public class AccountController {
     private AccountRepository accountRepository;
     private TransactionRepository transactionRepository;
     private NotificationRepository notificationRepository;
-    private Subject subject;
 
     public AccountController(LoginRepository loginRepository, AccountRepository accountRepository, TransactionRepository transactionRepository, NotificationRepository notificationRepository) {
         this.loginRepository = loginRepository;
         this.accountRepository = accountRepository;
         this.transactionRepository = transactionRepository;
         this.notificationRepository = notificationRepository;
-        this.subject = new Subject();
     }
 
     @GetMapping("/accounts")
@@ -97,10 +95,6 @@ public class AccountController {
             account.setBalance(100);
             accountRepository.save(account);
 
-            if(sendEmail) {
-                subject.subscribe(account);
-            }
-
             Login login = new Login();
             login.setEmail(email);
             login.setPassword(password);
@@ -112,32 +106,12 @@ public class AccountController {
         throw new IllegalStateException("That Email Is Already Associated With An Account!");
     }
 
-    @PutMapping("/update/emails")
-    public void updateObservers() {
-        List<Account> sendEmailAccounts = accountRepository.findBySendEmail(true);
-        List<Observer> observerList = new ArrayList<>();
-        for(Account acc : sendEmailAccounts) {
-            if(acc.isSendEmail()) {
-                observerList.add(acc);
-            }
-        }
-        subject.setObservers(observerList);
-    }
-
     @PutMapping("/update/notification/{email}/{emailPreference}")
     public void updateNotificationPreference(@PathVariable String email, @PathVariable boolean emailPreference) {
         Optional<Login> maybeLogin = loginRepository.findByEmail(email);
         if(maybeLogin.isEmpty())
             throw new IllegalStateException("Email not found!");
         Account updatedAccount = maybeLogin.get().getAccount();
-
-        if(emailPreference) {
-            if(!subject.getObservers().contains(updatedAccount))
-                subject.subscribe(updatedAccount);
-        }
-        else
-            subject.unsubscribe(updatedAccount);
-
         updatedAccount.setSendEmail(emailPreference);
         accountRepository.save(updatedAccount);
     }
@@ -147,25 +121,13 @@ public class AccountController {
         return notificationRepository.findAll();
     }
 
-    @GetMapping("/notifylist")
-    public List<Observer> getAccountsToNotify() {
-        return subject.getObservers();
-    }
-
-    @PostMapping("/notification")
+    @PostMapping("/notify")
     public void addNotification(@RequestBody Notification notification) {
         notificationRepository.save(notification);
 
-        subject.notify(notification);
-        for(Observer obs : subject.getObservers()) {
-            accountRepository.save((Account) obs);
+        for(Account account : accountRepository.findBySendEmail(true)) {
+            account.update(notification);
+            accountRepository.save(account);
         }
-
-//        Optional<Account> account = accountRepository.findById(accountid);
-//        if(account.isPresent()) {
-//            Account newAcc = account.get();
-//            newAcc.update(notification);
-//            accountRepository.save(newAcc);
-//        }
     }
 }
