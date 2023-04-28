@@ -4,10 +4,11 @@ import { useRouter } from 'next/router'
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
-    const router = useRouter();
+    const router = useRouter()
 
     const handleSignIn = () => {
-        router.push('http://localhost:3000/account');
+        // Replace '/account' with the actual path of your account page
+        router.push('/account')
     }
 
     return (
@@ -35,4 +36,5 @@ export default function Home() {
         </>
     )
 }
+
 

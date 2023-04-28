@@ -1,33 +1,17 @@
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
 
 function BankAccountPage() {
-    const router = useRouter();
     const [bankAccounts, setBankAccounts] = useState([]);
     const [selectedAccount, setSelectedAccount] = useState(null);
 
     useEffect(() => {
-        const { query } = router;
-        const accountId = query.accountId;
-
-        if (accountId) {
-            fetch(`http://localhost:8080/accounts/${accountId}`)
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    setBankAccounts([data]);
-                    setSelectedAccount(data);
-                })
-                .catch(error => console.error(error));
-        } else {
-            fetch("http://localhost:8080/accounts")
-                .then(response => response.json())
-                .then(data => {
-                    console.log(data);
-                    setBankAccounts(data);
-                })
-                .catch(error => console.error(error));
-        }
+        fetch("http://localhost:8080/accounts")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                setBankAccounts(data);
+            })
+            .catch(error => console.error(error));
     }, []);
 
     function handleAccountSelect(account) {
@@ -36,7 +20,7 @@ function BankAccountPage() {
 
     function handleTransferClick() {
         if (selectedAccount) {
-            router.push('/transfer');
+            window.location.href = '/transfer';
         }
     }
 
