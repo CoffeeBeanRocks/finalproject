@@ -7,6 +7,7 @@ export default function Home() {
     const router = useRouter()
 
     const handleSignIn = () => {
+        // Replace '/account' with the actual path of your account page
         router.push('/account')
     }
 

@@ -45,7 +45,7 @@ const NotificationPreferencePage = () => {
     const updateNotificationPreference = async (accountId, emailPreference) => {
         try {
             const response = await fetch(
-                `http://localhost:8080/update/notification/${accounts.find(account => account.id === accountId).email}/${emailPreference}`,
+                `http://localhost:8080/update/notification/${accountId}/${emailPreference}`,
                 {
                     method: 'PUT',
                     headers: {
@@ -112,8 +112,6 @@ const NotificationPreferencePage = () => {
 };
 
 export default NotificationPreferencePage;
-
-
 
 
 
